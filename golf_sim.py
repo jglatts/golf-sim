@@ -22,19 +22,19 @@ class GolfSim:
             return
 
         self.club_face = club_face
-        self.x_center = 50
-        self.x_ball = 50
+        self.x_center = 10
+        self.x_ball = 10
         self.y_center = 6
         self.y_ball = 6
+        self.fig, self.ax = plt.subplots()
         self.initPlot()
 
     """
         Setup the matplot graph
     """
     def initPlot(self):
-        self.fig, self.ax = plt.subplots()
         self.ax.set_title('Golf Path Sim')
-        self.ax.set_xlim(-80,180)
+        self.ax.set_xlim(-160,180)
         self.ax.set_ylim(-20,110)
 
     """
@@ -43,26 +43,26 @@ class GolfSim:
     def drawCenterLines(self):
         y_line_len = 180    
         v_line_len = 100     
-        y_line_center = (260 - y_line_len)/2
+        y_line_center = (360 - y_line_len)/2
         v_line_center = (130 - v_line_len)/2
 
-        self.ax.hlines(y=self.y_center, xmin=y_line_center-80, xmax=180-y_line_center, linewidth=2, color='g')
+        self.ax.hlines(y=self.y_center, xmin=y_line_center-160, xmax=180-y_line_center, linewidth=2, color='g')
         self.ax.vlines(x=self.x_center, ymin=self.y_center, ymax=110-v_line_center, linewidth=2, color='b')
 
     """
         Draw the golf ball and update pos based on club face\path 
     """
     def drawBall(self, frame_number):
-        y_ball = (self.y_ball * frame_number) 
-        x_ball = (self.x_ball * frame_number) 
+        y_ball = (self.y_ball) * frame_number 
+        x_ball = (self.x_ball) * frame_number 
 
         new_pos = self.computeBallPath(x_pos=x_ball)
         if (self.club_face & GolfSim.FACE_OPEN):
             y_ball = new_pos
         elif (self.club_face & GolfSim.FACE_CLOSED):
             # somewhat working abit hacky thoy 
-            x_ball = -new_pos
-            y_ball = -x_ball
+            x_ball = -x_ball
+            y_ball = new_pos
 
         if frame_number == 0 or x_ball == 0:
             y_ball = self.y_ball
@@ -92,7 +92,7 @@ class GolfSim:
             theta = (30 * np.pi) / 180    # 30deg open club face
             print(f'New ball pos: {np.sin(theta) * x_pos}')
         elif (self.club_face & GolfSim.FACE_CLOSED):
-            theta = (120 * np.pi) / 180    # 30deg closed club face
+            theta = (150 * np.pi) / 180    # 30deg closed club face
             print(f'New ball pos: {np.sin(theta) * x_pos}')
 
         return np.sin(theta) * x_pos            
@@ -105,7 +105,13 @@ class GolfSim:
     """
     def drawScene(self, frame_number):
         self.ax.clear()
-        self.drawLine(deg=120)
+        self.initPlot()
+
+        if (self.club_face & GolfSim.FACE_CLOSED):
+            self.drawLine(deg=150)
+        elif (self.club_face & GolfSim.FACE_OPEN):
+            self.drawLine(deg=30)
+        
         self.drawCenterLines()
         self.drawBall(frame_number)
 
@@ -113,7 +119,7 @@ class GolfSim:
         Setup the animaton for matplotlib
     """
     def animate(self):
-        anim = animation.FuncAnimation(self.fig, self.drawScene, frames=3, blit=False, repeat=True, interval=50)    
+        anim = animation.FuncAnimation(self.fig, self.drawScene, frames=10, blit=False, repeat=True, interval=50)    
         plt.show()
 
 
